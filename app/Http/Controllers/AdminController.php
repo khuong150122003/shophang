@@ -4,15 +4,16 @@ namespace App\Http\Controllers;
 
 use DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB as FacadesDB;
-use Redirect;
-use Session;
-session_start();
+use App\Models\User;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Session;
 class AdminController extends Controller
 {
     public function index()
     {
-        return view('admin_login');
+        return view('registration.login');
     }
     public function show_dashboard()
     {
@@ -20,18 +21,19 @@ class AdminController extends Controller
     }
     public function dashboard(Request $request)
     {
-       $admin_email=$request->admin_email;
+       $admin_email= $request->admin_email;
        $admin_password=md5($request->admin_password);
-       $result= DB::table('tbl_admin')->where('admin_email',$admin_email)->where('admin_password',$admin_password)->first();
+       $result= User::where('email',$admin_email)->where('password',$admin_password)->first();
         if($result)
         {
             Session::put('admin_name',$result->admin_name);
             Session::put('admin_id',$result->admin_id);
-            return Redirect::to('/dashboard');
+            return Redirect::to('/all_product');
     } else
     {
         Session::put('message','Something went wrong');
-        return Redirect::to('/adminstator');
+
+        return Redirect::to('/logiin');
     }
     }
     public function logout()
@@ -40,5 +42,38 @@ class AdminController extends Controller
             Session::put('admin_id',null);
             return Redirect::to('/adminstator');
     }
-    
+
+    public function create()
+    {
+        return view('registration.create');
+    }
+
+    public function store(Request $request)
+    {
+
+        $request->validate([
+            'name' => 'required|string|max:255|min:10',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:5',
+        ], [
+            'required' => ":attribute không được để trống",
+            'min' => ":attribute phải có độ dài ít nhất :min kí tự",
+            'max' => ":attribute phải có độ dài tối đa :max kí tự",
+            'email' => ":attribute chưa đúng định dạng",
+            'unique' => ":attribute đã tồn tại",
+        ], [
+            'name' => "Tên người dùng",
+            'email' => "Email",
+            'password' => "Mật khẩu",
+        ]);
+
+        User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
+
+        return redirect('/login');
+    }
+
 }
