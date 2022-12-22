@@ -48,8 +48,6 @@ Route::post('/save_cart','App\Http\Controllers\CartController@save_cart');
 Route::get('/show_cart','App\Http\Controllers\CartController@show_cart');
 
 
-Route::get('/register', 'RegistrationController@create');
-Route::post('register', 'RegistrationController@store');
 Route::get('/login', 'SessionsController@create');
 Route::post('/login', 'SessionsController@store');
 Route::get('/logout', 'SessionsController@destroy');
